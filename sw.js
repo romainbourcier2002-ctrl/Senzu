@@ -1,4 +1,4 @@
-const VERSION = '20261005141422';
+const VERSION = '20261005183932';
 const APPLI = 'senzu-appli-' + VERSION, CARTE = 'senzu-carte';
 const FICHIERS = ['./', 'index.html', 'manifest.webmanifest', 'icone-192.png', 'icone-512.png', 'apple-touch-icon.png'];
 const BIBLIOTHEQUES = [
