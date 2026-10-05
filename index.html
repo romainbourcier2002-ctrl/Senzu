@@ -183,10 +183,18 @@ body.sur-carte .puce-pos{display:none}
 /* ---------- carte et panneau */
 #resultats{position:fixed;top:calc(var(--bandeau) + var(--encoche));left:0;right:0;bottom:calc(var(--barre) + env(safe-area-inset-bottom))}
 #carte{position:absolute;inset:0;background:var(--carte-fond)}
-#carte.mode-choix{cursor:crosshair}
 .leaflet-container{font-family:var(--font);background:var(--carte-fond)}
 .leaflet-container a{color:var(--accent-texte)}
-.leaflet-control-attribution{font-size:11px;border-radius:6px 0 0 0;background:color-mix(in srgb,var(--surface) 88%,transparent)!important;color:var(--ink-2)}
+/* sources de la carte : une bulle « i » (ouverte à l'arrivée, repliée dès que je touche la carte) */
+.info-carte{position:absolute;z-index:560;right:12px;bottom:12px;display:flex;align-items:flex-end;justify-content:flex-end;gap:6px;max-width:calc(100% - 24px);pointer-events:none}
+.info-carte > *{pointer-events:auto}
+.info-texte{display:none;font-size:11px;line-height:1.45;font-weight:500;color:var(--ink-2);background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:5px 10px;box-shadow:var(--ombre-legere)}
+.info-carte.ouverte .info-texte{display:block}
+.info-texte a{color:inherit;text-decoration:none}
+.info-texte a:hover{color:var(--ink);text-decoration:underline}
+.info-bouton{position:relative;width:28px;height:28px;flex:none;border:1px solid var(--bar-line);border-radius:50%;background:var(--bar-bg);color:var(--bar-ink);font-family:var(--font-display);font-size:14px;font-weight:600;line-height:1;display:flex;align-items:center;justify-content:center;padding:0;box-shadow:var(--ombre-legere)}
+.info-bouton::after{content:"";position:absolute;inset:-8px}
+.info-carte.ouverte .info-bouton{background:var(--surface);color:var(--ink);border-color:var(--line)}
 .leaflet-tooltip{background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:var(--r-petit);box-shadow:var(--ombre-legere);font-size:var(--t-legende);font-weight:600}
 .leaflet-tooltip-top:before{border-top-color:var(--surface)}
 .repere-ancre{background:none;border:none}
@@ -200,13 +208,13 @@ body.sur-carte .puce-pos{display:none}
 .outil:hover{background:var(--surface-2)}
 .outil.seul{border:1px solid var(--line);border-radius:var(--r-moyen);box-shadow:var(--ombre-legere)}
 .outil.bleu{color:var(--pos)}
-.menu-fond,.menu-pos{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-moyen);box-shadow:var(--ombre-forte);padding:6px;display:flex;flex-direction:column;min-width:200px}
-.menu-fond button,.menu-pos button{border:none;background:none;text-align:left;min-height:40px;padding:0 10px;border-radius:var(--r-petit);font-size:var(--t-texte);font-weight:500;color:var(--ink);display:flex;align-items:center;gap:10px}
+.outil[aria-busy="true"] .ic{animation:localise 1s ease-in-out infinite}
+@keyframes localise{50%{opacity:.3}}
+.menu-fond{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-moyen);box-shadow:var(--ombre-forte);padding:6px;display:flex;flex-direction:column;min-width:200px}
+.menu-fond button{border:none;background:none;text-align:left;min-height:40px;padding:0 10px;border-radius:var(--r-petit);font-size:var(--t-texte);font-weight:500;color:var(--ink);display:flex;align-items:center;gap:10px}
 .menu-fond button{justify-content:space-between}
-.menu-fond button:hover,.menu-pos button:hover{background:var(--surface-2)}
+.menu-fond button:hover{background:var(--surface-2)}
 .menu-fond button[aria-pressed="true"]{color:var(--accent-texte);font-weight:600}
-.bandeau{position:absolute;z-index:600;top:16px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:12px;padding:8px 8px 8px 16px;border-radius:var(--r-moyen);background:var(--toast-bg);color:var(--toast-ink);font-size:var(--t-texte);font-weight:600;box-shadow:var(--ombre-forte)}
-.bandeau button{height:36px;border:none;border-radius:var(--r-petit);background:rgba(244,241,232,.14);color:var(--toast-ink);font-size:var(--t-meta);font-weight:600;padding:0 12px}
 .toast{position:fixed;z-index:990;left:50%;bottom:calc(var(--barre) + 16px + env(safe-area-inset-bottom));transform:translateX(-50%);max-width:min(520px,calc(100% - 32px));padding:12px 14px;border-radius:var(--r-moyen);background:var(--toast-bg);color:var(--toast-ink);font-size:var(--t-meta);font-weight:500;line-height:1.45;box-shadow:var(--ombre-forte)}
 .toast code{font-family:ui-monospace,Menlo,monospace;font-size:var(--t-legende);background:rgba(244,241,232,.12);padding:1px 4px;border-radius:4px}
 #panneau{position:absolute;z-index:700;left:16px;top:16px;bottom:16px;width:400px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-grand);box-shadow:var(--ombre-forte);display:flex;flex-direction:column;overflow:hidden;scroll-margin-top:calc(var(--bandeau) + var(--encoche))}
@@ -214,12 +222,10 @@ body.sur-carte .puce-pos{display:none}
 .panneau-corps{flex:1;overflow-y:auto;min-height:0}
 .rond{width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--ink);display:flex;align-items:center;justify-content:center;flex:none;padding:0}
 .rond:hover{background:var(--surface-2)}
-.ligne-pos{display:flex;align-items:center;gap:10px;position:relative}
-.ligne-pos .ico-pos{width:36px;height:36px;border-radius:var(--r-moyen);background:var(--pos-soft);color:var(--pos);display:flex;align-items:center;justify-content:center;flex:none}
-.ligne-pos .txt{flex:1;min-width:0;display:flex;flex-direction:column}
-.ligne-pos .txt b{font-size:var(--t-texte);font-weight:600}
-.ligne-pos .txt small{font-size:var(--t-legende);color:var(--ink-3)}
-.menu-pos{position:absolute;right:0;top:44px;z-index:5;min-width:240px}
+.poignee{display:none}
+.tete-ligne{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:32px}
+.compte{font-size:var(--t-meta);color:var(--ink-3);white-space:nowrap}
+.compte b{font-family:var(--font-display);font-size:var(--t-bloc);font-weight:600;color:var(--ink);letter-spacing:-.01em}
 .puces{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:0 64px 2px 16px;-webkit-mask-image:linear-gradient(90deg,#000 85%,transparent);mask-image:linear-gradient(90deg,#000 85%,transparent)}
 .puces::-webkit-scrollbar{display:none}
 .puce-seance{flex:none;height:36px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-size:var(--t-meta);font-weight:500;color:var(--ink)}
@@ -257,6 +263,9 @@ body.sur-carte .puce-pos{display:none}
 .leaflet-interactive.trace-inerte{cursor:grab}
 .vide{padding:28px 16px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px;font-size:var(--t-texte);color:var(--ink-3);line-height:1.5}
 .vide b{font-family:var(--font-display);color:var(--ink);font-size:var(--t-bloc);font-weight:600}
+.vide code{display:block;width:100%;font-family:ui-monospace,Menlo,monospace;font-size:var(--t-legende);line-height:1.5;background:var(--surface-2);color:var(--ink);padding:8px 10px;border-radius:var(--r-petit);text-align:left;word-break:break-all;-webkit-user-select:all;user-select:all}
+.note-zone{margin-top:12px}
+.vide-astuce{display:flex;flex-direction:column;gap:8px;margin-top:8px;font-size:var(--t-meta)}
 .vide .rond-ic{width:48px;height:48px;border-radius:50%;background:var(--accent-soft);color:var(--accent-action);display:flex;align-items:center;justify-content:center}
 .titre-onglet{display:flex;flex-direction:column;gap:2px}
 .titre-onglet b{font-family:var(--font-display);font-size:var(--t-carte);font-weight:600;letter-spacing:-.015em}
@@ -271,7 +280,10 @@ body.sur-carte .puce-pos{display:none}
 .etoile{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--surface);display:flex;align-items:center;justify-content:center;color:var(--ink-2);padding:0;flex:none}
 .etoile:hover{background:var(--surface-2)}
 .etoile[aria-pressed="true"]{color:var(--accent-action);border-color:var(--accent-action);background:var(--accent-soft)}
-.fiche h1{font-size:var(--t-fiche);line-height:1.2;letter-spacing:-.02em}
+.tete-fiche{gap:8px;padding:10px 20px 14px}
+.tete-fiche .fiche-haut{margin:0 -4px}
+.tete-fiche h1{font-size:var(--t-fiche);line-height:1.2;letter-spacing:-.02em}
+.fiche-infos{display:flex;flex-direction:column;gap:6px}
 .sous{font-size:var(--t-meta);color:var(--ink-3)}
 .niveau{display:flex;align-items:center;gap:8px;margin-top:2px;font-size:var(--t-meta);font-weight:600}
 .profil{background:var(--surface-2);border-radius:var(--r-carte);padding:12px 12px 8px}
@@ -341,13 +353,25 @@ body.sur-carte .puce-pos{display:none}
 }
 /* ---------- téléphone */
 @media (max-width:900px){
-  #resultats{position:relative;top:auto;display:flex;flex-direction:column;bottom:auto}
-  #carte{position:relative;height:46vh;min-height:300px;flex:none}
-  .outils{top:12px;right:12px}
-  #panneau{position:static;width:auto;border:none;border-radius:var(--r-grand) var(--r-grand) 0 0;margin-top:-16px;box-shadow:0 -4px 16px rgba(15,44,39,.1);overflow:visible}
-  .panneau-corps{overflow:visible}
-  .leaflet-bottom{bottom:16px}
-  .bandeau{top:12px;width:calc(100% - 24px);justify-content:space-between}
+  /* Carte et Favoris : la carte prend tout l'écran sous la barre d'état ; le bandeau Senzu reste sur l'accueil */
+  body.sur-carte{padding-top:var(--encoche);overflow:hidden}
+  body.sur-carte .bandeau-haut{height:var(--encoche);padding-top:0;border-bottom:none}
+  body.sur-carte .bh-int{display:none}
+  #resultats{top:var(--encoche);overflow:hidden}
+  .outils{top:12px;right:12px;transition:opacity .2s}
+  .info-carte{right:10px;bottom:calc(var(--feuille-h,50%) + 10px);transition:bottom .3s cubic-bezier(.2,.8,.2,1)}
+  #resultats.feuille-grande .outils,#resultats.feuille-grande .info-carte{opacity:0;visibility:hidden}
+  /* feuille du bas : trois hauteurs (réduite, moitié, grande), à faire glisser comme sur Strava */
+  #panneau{top:auto;left:0;right:0;bottom:0;width:auto;height:50%;border:none;border-radius:var(--r-grand) var(--r-grand) 0 0;box-shadow:0 -2px 18px rgba(15,44,39,.16);transition:transform .3s cubic-bezier(.2,.8,.2,1);will-change:transform}
+  #panneau.glisse{transition:none}
+  .panneau-tete{position:relative;padding-top:22px;touch-action:pan-x}
+  .poignee{display:flex;position:absolute;top:0;left:50%;width:80px;height:24px;margin-left:-40px;border:none;background:none;padding:0;align-items:center;justify-content:center;touch-action:none}
+  .poignee i{width:36px;height:5px;border-radius:3px;background:var(--line-fort)}
+  .panneau-corps{overflow:hidden;touch-action:none}
+  #resultats.feuille-grande .panneau-corps{overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y}
+  #resultats:not(.feuille-grande) .pf-zone{touch-action:none}
+  .puces{touch-action:pan-x}
+  .tete-fiche h1{font-size:20px}
   body{padding-bottom:calc(var(--barre) + env(safe-area-inset-bottom))}
   #accueil{padding-bottom:24px}
 }
@@ -395,11 +419,11 @@ body.sur-carte .puce-pos{display:none}
 <hr>
 <button type="button" class="outil" id="btn-zoom-moins" aria-label="Dézoomer" data-icone="moins"></button>
 </div>
-<button type="button" class="outil seul bleu" id="btn-recentrer" aria-label="Recentrer la carte" data-icone="recentrer"></button>
+<button type="button" class="outil seul bleu" id="btn-recentrer" aria-label="Me localiser" title="Me localiser" data-icone="cible"></button>
 <button type="button" class="outil seul" id="btn-fond" aria-label="Changer de fond de carte" aria-expanded="false" data-icone="fond"></button>
 <div class="menu-fond" id="menu-fond" hidden></div>
 </div>
-<div class="bandeau" id="bandeau-choix" hidden><span>Toucher la carte pour placer mon point de départ</span><button type="button" id="btn-annuler-choix">Annuler</button></div>
+<div class="info-carte ouverte" id="info-carte"><span class="info-texte" id="info-texte"></span><button type="button" class="info-bouton" id="btn-info" aria-label="Sources de la carte" aria-expanded="true" aria-controls="info-texte">i</button></div>
 <aside id="panneau" aria-label="Côtes"></aside>
 </div>
 
@@ -419,14 +443,9 @@ const ic = (nom, style, cls) => '<svg class="' + (cls || 'ic') + '" viewBox="0 0
 const SOUS_TITRES = {toutes: 'Toutes séances confondues', explo: 'Courtes et raides', vma: '150 à 600 m', dplus: 'Longues montées', esc: 'Le D+ des villes', desc: 'Travail technique'};
 
 const ZONE = {s: D.zone[0], w: D.zone[1], n: D.zone[2], e: D.zone[3]};
-const RAYONS = (() => {
-  const l = [1, 2, 5, 10, 20].filter(r => r <= D.rayon + 1e-9);
-  if (!l.length || l[l.length - 1] < D.rayon - 1e-9) l.push(Math.round(D.rayon * 10) / 10);
-  return l;
-})();
 const etat = {
-  onglet: 'accueil', seance: 'toutes', rayon: RAYONS.includes(5) ? 5 : RAYONS[RAYONS.length - 1],
-  pos: null, sel: null, fiche: null, reps: 8, max: 40, choix: false, menuPos: false, attente: false, message: null, cadre: {}, tri: 'distance', idee: 0, selCarte: false, sensFiche: null
+  onglet: 'accueil', seance: 'toutes', sel: null, fiche: null, reps: 8, max: 40, attente: false, message: null, tri: 'distance', idee: 0, selCarte: false, sensFiche: null,
+  feuille: 'moitie', vueCarte: null, vueAvantFiche: null, feuilleAvantFiche: null, centrerSurMoi: false
 };
 
 function dist(a, b) {
@@ -437,7 +456,6 @@ function dist(a, b) {
 const dansZone = p => p[0] >= ZONE.s && p[0] <= ZONE.n && p[1] >= ZONE.w && p[1] <= ZONE.e;
 function distTxt(m) { return m < 1000 ? (Math.round(m / 10) * 10) + ' m' : fr(m / 1000, 1) + ' km'; }
 function longTxt(m) { return m < 1000 ? Math.round(m) + ' m' : fr(m / 1000, 1) + ' km'; }
-const kmTxt = r => fr(r, r % 1 ? 1 : 0) + ' km';
 const surCarte = () => etat.onglet === 'carte';
 // sens de lecture d'une côte : celui du filtre (Descente ou non), sauf si la fiche ouverte a été basculée
 const enDescente = () => etat.fiche !== null && etat.sensFiche ? etat.sensFiche === 'descente' : surCarte() && etat.seance === 'desc';
@@ -492,7 +510,6 @@ etat.gps = (() => {
     return g && Array.isArray(g.coords) && dansZone(g.coords) ? g : null;
   } catch (e) { return null; }
 })();
-if (etat.gps) etat.pos = {coords: etat.gps.coords.slice(), source: 'gps', precision: etat.gps.precision || null};
 
 /* ---------- listes */
 function presenter(c) {
@@ -503,20 +520,47 @@ function presenter(c) {
     profil: c.profil.slice().reverse().map(p => [L - p[0], p[1]])
   });
 }
+// la partie de la carte que je vois : sans le panneau (ordinateur) ni la feuille du bas (téléphone)
+function boiteVisible() {
+  if (!carte) return null;
+  const t = carte.getSize();
+  if (!t.x || !t.y) return null;
+  let x0 = 0, y1 = t.y;
+  if (largeur()) x0 = Math.min(432, Math.max(0, t.x - 160));
+  else y1 = Math.max(80, t.y - feuilleVisible());
+  const so = carte.containerPointToLatLng([x0, y1]), ne = carte.containerPointToLatLng([t.x, 0]);
+  return {s: so.lat, w: so.lng, n: ne.lat, e: ne.lng};
+}
+const dansBoite = (b, p) => p[0] >= b.s && p[0] <= b.n && p[1] >= b.w && p[1] <= b.e;
+const centreBoite = b => [(b.s + b.n) / 2, (b.w + b.e) / 2];
+const horsDeLaZone = b => b.n < ZONE.s || b.s > ZONE.n || b.e < ZONE.w || b.w > ZONE.e;
+const debordeLaZone = b => b.s < ZONE.s || b.n > ZONE.n || b.w < ZONE.w || b.e > ZONE.e;
+// une côte telle qu'elle s'affiche (retournée en descente), avec sa distance à ma position
+function coteVue(id, o) {
+  const brut = parId[id];
+  if (!brut) return null;
+  const c = presenter(brut);
+  return Object.assign({}, c, {dist: dist(o || origine(), c.coords[0])});
+}
+// Carte : les côtes de la séance dont le départ est visible, comme les segments de Strava ;
+// Favoris : tous mes favoris.
 function liste() {
-  if (!etat.pos) return [];
-  const p = etat.pos.coords;
   if (etat.onglet === 'favoris') {
-    return trier(D.cotes.filter(c => idsFavoris.has(c.id)).map(c => { const v = presenter(c); return Object.assign({}, v, {dist: dist(p, v.coords[0])}); }));
+    const o = origine();
+    return trier(D.cotes.filter(c => idsFavoris.has(c.id)).map(c => coteVue(c.id, o)));
   }
-  const r = etat.rayon * 1000, res = [];
+  const b = boiteVisible();
+  if (!b) return [];
+  // sans position exacte, le tri par distance part du centre de ce que je vois
+  const o = etat.gps ? etat.gps.coords : centreBoite(b), desc = enDescente(), res = [];
   for (const brut of D.cotes) {
     if (!brut.seances.includes(etat.seance)) continue;
+    const bas = brut.coords[0], haut = brut.coords[brut.coords.length - 1];
+    // « Toutes » garde aussi une côte dont seul le haut est visible (elle y figure en Descente)
+    const vue = desc ? dansBoite(b, haut) : dansBoite(b, bas) || (etat.seance === 'toutes' && brut.seances.includes('desc') && dansBoite(b, haut));
+    if (!vue) continue;
     const c = presenter(brut);
-    const d = dist(p, c.coords[0]);
-    // « Toutes » garde aussi une côte dont seul le haut est dans le rayon (elle y figure en Descente)
-    const dedans = d <= r || brut.id === etat.fiche || (etat.seance === 'toutes' && brut.seances.includes('desc') && dist(p, c.coords[c.coords.length - 1]) <= r);
-    if (dedans) res.push(Object.assign({}, c, {dist: d}));
+    res.push(Object.assign({}, c, {dist: dist(o, c.coords[0])}));
   }
   return trier(res);
 }
@@ -527,20 +571,6 @@ function trier(l) {
   return l.sort((a, b) => k(a) - k(b) || a.dist - b.dist);
 }
 const selectTri = () => '<label class="tri-liste">Trier par <select id="tri" aria-label="Trier les côtes">' + TRIS.map(t => '<option value="' + t[0] + '"' + (t[0] === etat.tri ? ' selected' : '') + '>' + t[1] + '</option>').join('') + '</select>' + ic('bas') + '</label>';
-function compter() {
-  const n = {};
-  D.seances.forEach(s => { n[s.id] = 0; });
-  if (!etat.pos) return n;
-  const p = etat.pos.coords, r = etat.rayon * 1000;
-  for (const c of D.cotes) {
-    const bas = dist(p, c.coords[0]) <= r;
-    const haut = dist(p, c.coords[c.coords.length - 1]) <= r;
-    for (const s of c.seances) {
-      if (s === 'desc' ? haut : s === 'toutes' ? (bas || (haut && c.seances.includes('desc'))) : bas) n[s]++;
-    }
-  }
-  return n;
-}
 const penteTxt = (c, n) => (enDescente() ? '−' : '') + fr(c.pente, n === undefined ? 0 : n) + ' %';
 function barres(n) {
   let h = '<span class="barres" aria-hidden="true">';
@@ -592,7 +622,7 @@ function comparaison(total) {
 function lienItineraire(c) {
   const d = c.coords[0];
   let u = 'https://www.google.com/maps/dir/?api=1&destination=' + d[0] + ',' + d[1] + '&travelmode=walking';
-  if (etat.pos && etat.pos.source === 'gps') u += '&origin=' + etat.pos.coords[0].toFixed(5) + ',' + etat.pos.coords[1].toFixed(5);
+  if (etat.gps) u += '&origin=' + etat.gps.coords[0].toFixed(5) + ',' + etat.gps.coords[1].toFixed(5);
   return u;
 }
 
@@ -632,7 +662,7 @@ function rendreOnglets() {
 const ROTATION = ['desc', 'vma', 'explo', 'dplus', 'vma', 'esc', 'dplus'];
 const REPETITIONS = {explo: 10, vma: 8, esc: 10, desc: 6};
 const TUILES = [['explo', 'Explosivité'], ['vma', 'VMA'], ['dplus', 'Volume D+'], ['esc', 'Escaliers'], ['desc', 'Descente']];
-const origine = () => etat.pos ? etat.pos.coords : D.centre;
+const origine = () => etat.gps ? etat.gps.coords : D.centre;
 const departPour = (c, s) => s === 'desc' ? c.coords[c.coords.length - 1] : c.coords[0];
 const repetitions = (s, c) => REPETITIONS[s] || Math.max(2, Math.min(12, Math.round(400 / Math.max(c.denivele, 1))));
 function idees() {
@@ -666,7 +696,7 @@ function ligneProche(c, d, s) {
 const majuscule = t => t.charAt(0).toUpperCase() + t.slice(1);
 function rendreAccueil() {
   const o = origine();
-  const gps = etat.pos && etat.pos.source === 'gps';
+  const gps = !!etat.gps;
   const connue = !!etat.gps;
   const puce = $('#btn-localiser');
   puce.innerHTML = (connue ? '<span class="point"></span>' : ic('cible')) + '<span>' + (etat.attente ? 'Localisation en cours…' : connue ? 'Position exacte enregistrée' : 'Utiliser ma position exacte') + '</span>';
@@ -693,7 +723,7 @@ function rendreAccueil() {
     if (gps) itin += '&origin=' + o[0].toFixed(5) + ',' + o[1].toFixed(5);
     $('#jour').innerHTML = '<div class="jour-tete"><span class="sur-titre">Séance du jour</span><span class="tag-seance">' + ic(s.id) + esc(s.libelle) + '</span></div>'
       + '<button type="button" class="jour-titre" data-ouvrir="' + c.id + '" data-sc="' + idee.seance + '" data-n="' + n + '">' + n + ' × ' + esc(c.nom) + '</button>'
-      + '<span class="jour-meta">À ' + distTxt(idee.dist) + (gps ? ' de ma position' : etat.pos && etat.pos.source === 'carte' ? ' de mon point' : ' du centre de ma zone') + ' · ' + longTxt(c.longueur) + ' de long' + (c.revetement ? ' · ' + esc(c.revetement) : '') + '</span>'
+      + '<span class="jour-meta">À ' + distTxt(idee.dist) + (gps ? ' de ma position' : ' du centre de ma zone') + ' · ' + longTxt(c.longueur) + ' de long' + (c.revetement ? ' · ' + esc(c.revetement) : '') + '</span>'
       + bandeProfil(profil)
       + '<div class="stats chiffre"><div><b>' + total + ' m</b><small>' + (desc ? 'descente totale' : 'D+ total') + '</small></div>'
       + '<div><b>' + (desc ? '−' : '') + fr(c.pente, 0) + ' %</b><small>pente moyenne</small></div>'
@@ -723,34 +753,36 @@ function horsZone(c) {
   const km = dist(c, D.centre) / 1000;
   return 'Ce point est à ' + fr(km, km < 10 ? 1 : 0) + ' km du centre de ma zone, en dehors de la zone calculée. Pour le couvrir, relancer le script avec <code>--lat ' + c[0].toFixed(4) + ' --lon ' + c[1].toFixed(4) + '</code>.';
 }
-const rafraichir = () => { if (etat.onglet === 'accueil') rendreAccueil(); else rendrePanneau(); };
-function localiser() {
-  etat.menuPos = false;
+// la demande de position en cours se voit sur la puce de l'accueil et sur le bouton de la carte
+function montrerAttente() {
+  if (etat.onglet === 'accueil') { rendreAccueil(); return; }
+  $('#btn-recentrer').setAttribute('aria-busy', etat.attente ? 'true' : 'false');
+}
+function localiser(centrer) {
+  if (centrer) etat.centrerSurMoi = true;
   if (etat.attente) return;   // une seule demande à la fois (deux demandes croisées donnaient un faux échec)
   if (!navigator.geolocation) {
-    if (etat.gps) definirPosition(etat.gps.coords.slice(), 'gps', etat.gps.precision);
-    else signaler('Mon navigateur ne permet pas de me localiser : utiliser le centre de ma zone ou choisir un point sur la carte.');
+    etat.centrerSurMoi = false;
+    if (!etat.gps) signaler('Mon navigateur ne permet pas de me localiser : Senzu part du centre de ma zone.');
     return;
   }
   etat.attente = true;
   etat.message = null;
-  rafraichir();
+  montrerAttente();
   const reussite = p => {
     etat.attente = false;
     const c = [p.coords.latitude, p.coords.longitude];
-    if (!dansZone(c)) { signaler(horsZone(c)); rafraichir(); return; }
-    etat.gps = {coords: c, precision: Math.round(p.coords.accuracy || 0) || null};
-    try { localStorage.setItem(CLE_POSITION, JSON.stringify(etat.gps)); } catch (e) {}
-    definirPosition(c.slice(), 'gps', p.coords.accuracy);
+    if (!dansZone(c)) { etat.centrerSurMoi = false; signaler(horsZone(c)); montrerAttente(); return; }
+    positionTrouvee(c, Math.round(p.coords.accuracy || 0) || null);
   };
   const echec = err => {
     etat.attente = false;
-    // une position exacte est déjà connue : on la reprend, sans message d'erreur
-    if (etat.gps) { definirPosition(etat.gps.coords.slice(), 'gps', etat.gps.precision); return; }
-    signaler(err && err.code === 1
-      ? 'Accès à ma position refusé : l\'autoriser dans les réglages du navigateur, ou utiliser le centre de ma zone.'
-      : 'Position exacte indisponible pour l\'instant : réessayer dans un moment, ou utiliser le centre de ma zone.');
-    rafraichir();
+    etat.centrerSurMoi = false;
+    // une position exacte est déjà connue : on la garde, sans message d'erreur
+    if (!etat.gps) signaler(err && err.code === 1
+      ? 'Accès à ma position refusé : l\'autoriser dans les réglages du navigateur. En attendant, Senzu part du centre de ma zone.'
+      : 'Position exacte indisponible pour l\'instant : réessayer dans un moment. En attendant, Senzu part du centre de ma zone.');
+    montrerAttente();
   };
   // d'abord le GPS précis, puis, s'il ne répond pas, la localisation par Wi-Fi (souvent la seule sur un ordinateur)
   navigator.geolocation.getCurrentPosition(reussite, err => {
@@ -758,31 +790,38 @@ function localiser() {
     navigator.geolocation.getCurrentPosition(reussite, echec, {enableHighAccuracy: false, timeout: 12000, maximumAge: 600000});
   }, {enableHighAccuracy: true, timeout: 8000, maximumAge: 60000});
 }
-function definirPosition(c, source, precision) {
-  etat.pos = {coords: c, source: source, precision: precision || null};
-  etat.sel = null; etat.fiche = null; etat.max = 40; etat.choix = false; etat.menuPos = false; etat.message = null;
-  etat.cadre = {};
+function positionTrouvee(c, precision) {
+  const avant = etat.gps, centrer = etat.centrerSurMoi;
+  etat.gps = {coords: c, precision: precision};
+  try { localStorage.setItem(CLE_POSITION, JSON.stringify(etat.gps)); } catch (e) {}
+  etat.centrerSurMoi = false; etat.message = null; etat.idee = 0;
   $('#toast').hidden = true;
-  etat.idee = 0;
   if (etat.onglet === 'accueil') { rendreAccueil(); return; }
-  aller(etat.onglet === 'favoris' ? 'favoris' : 'carte');
+  montrerAttente();
+  rendreTout();
+  // déjà centrée sur l'ancienne position au moment du toucher : on ne bouge que si j'ai bougé
+  if (centrer && (!avant || dist(avant.coords, c) > 25)) centrerSur(c, true);
 }
-function aller(onglet) {
+function aller(onglet, cadrage) {
+  // la vue de l'onglet Carte est retrouvée telle que je l'ai laissée
+  if (carte && etat.onglet === 'carte') etat.vueCarte = etat.vueAvantFiche || {c: carte.getCenter(), z: carte.getZoom()};
   etat.onglet = onglet;
-  etat.fiche = null; etat.menuPos = false;
-  if (onglet !== 'carte') etat.choix = false;
+  etat.fiche = null; etat.sel = null; etat.selCarte = false; etat.max = 40;
+  etat.vueAvantFiche = null; etat.feuilleAvantFiche = null; etat.feuille = 'moitie';
   document.body.classList.toggle('sur-carte', onglet !== 'accueil');
   $('#accueil').hidden = onglet !== 'accueil';
   $('#resultats').hidden = onglet === 'accueil';
   rendreOnglets();
-  if (onglet === 'accueil') { rendreAccueil(); window.scrollTo(0, 0); return; }
-  if (!etat.pos) etat.pos = {coords: D.centre.slice(), source: 'centre', precision: null};
-  initCarte();
-  carte.invalidateSize();
-  rendreTout();
-  const cle = onglet + '|' + etat.rayon + '|' + etat.pos.coords.join(',');
-  if (etat.cadre[onglet] !== cle) { cadrerVue(); etat.cadre[onglet] = cle; }
   window.scrollTo(0, 0);
+  if (onglet === 'accueil') { rendreAccueil(); return; }
+  initCarte();
+  carte.invalidateSize({pan: false});
+  rendrePanneau();                          // l'en-tête d'abord : la hauteur de la feuille en dépend
+  if (cadrage) cadrage();
+  else if (onglet === 'favoris') cadrerFavoris();
+  else if (etat.vueCarte) carte.setView(etat.vueCarte.c, etat.vueCarte.z, {animate: false});
+  else cadrerAutour(origine(), 1500);
+  rendreTout();
 }
 
 /* ---------- carte */
@@ -799,11 +838,12 @@ function fondEpure() {
   } catch (e) { return null; }
 }
 const largeur = () => window.innerWidth > 900;
-const marges = () => largeur() ? {paddingTopLeft: [452, 48], paddingBottomRight: [72, 96]} : {paddingTopLeft: [56, 56], paddingBottomRight: [104, 40]};
+// la fiche laisse de la place aux étiquettes Départ et Arrivée, de part et d'autre du tracé
+const marges = fiche => largeur() ? (fiche ? {paddingTopLeft: [500, 72], paddingBottomRight: [120, 96]} : {paddingTopLeft: [452, 48], paddingBottomRight: [72, 96]})
+  : fiche ? {paddingTopLeft: [64, 64], paddingBottomRight: [116, feuilleVisible() + 24]} : {paddingTopLeft: [24, 24], paddingBottomRight: [64, feuilleVisible() + 24]};
 function initCarte() {
   if (carte) return;
-  carte = L.map('carte', {zoomControl: false, attributionControl: true, zoomSnap: 0.25, zoomDelta: 1, wheelPxPerZoomLevel: 30});
-  carte.attributionControl.setPrefix('');
+  carte = L.map('carte', {zoomControl: false, attributionControl: false, zoomSnap: 0.25, zoomDelta: 1, wheelPxPerZoomLevel: 30});
   rendu = L.canvas({padding: 0.3, tolerance: L.Browser.touch ? 10 : 3});  // zone de toucher élargie au doigt
   FONDS = [
     {nom: 'Épuré', couche: fondEpure(), style: styleEpure()},
@@ -822,18 +862,17 @@ function initCarte() {
   }
   couches = {zone: L.layerGroup().addTo(carte), reperes: L.layerGroup().addTo(carte), trace: L.layerGroup().addTo(carte), pos: L.layerGroup().addTo(carte), curseur: L.layerGroup().addTo(carte)};
   let minuterieDeselection = 0;
-  carte.on('click', e => {
-    if (!etat.choix) {
-      // attendre un instant : le premier clic d'un double-clic ne doit pas désélectionner
-      clearTimeout(minuterieDeselection);
-      if (etat.sel !== null || etat.fiche !== null) minuterieDeselection = setTimeout(deselectionner, 280);
-      return;
-    }
-    const c = [e.latlng.lat, e.latlng.lng];
-    if (!dansZone(c)) { signaler(horsZone(c)); return; }
-    definirPosition(c, 'carte');
+  carte.on('click', () => {
+    // attendre un instant : le premier clic d'un double-clic ne doit pas désélectionner
+    clearTimeout(minuterieDeselection);
+    if (etat.sel !== null || etat.fiche !== null) minuterieDeselection = setTimeout(deselectionner, 280);
   });
   carte.on('dblclick', () => clearTimeout(minuterieDeselection));
+  // la liste suit la carte : après chaque déplacement ou zoom, elle montre les côtes visibles
+  carte.on('moveend', listeSuitLaCarte);
+  // les sources se replient dans la bulle « i » dès que je touche la carte
+  $('#carte').addEventListener('pointerdown', replierInfo, {passive: true});
+  $('#resultats').addEventListener('wheel', replierInfo, {capture: true, passive: true});
   // molette à crans : intercepté avant Leaflet, qui sinon n'avance que d'un quart de niveau par cran sur Mac
   $('#resultats').addEventListener('wheel', molette, {capture: true, passive: false});
 }
@@ -880,57 +919,69 @@ function changerFond(i) {
   FONDS[i].couche.addTo(carte);
   if (FONDS[i].couche.bringToBack) FONDS[i].couche.bringToBack();
   $('#menu-fond').innerHTML = FONDS.map((f, k) => '<button type="button" data-fond="' + k + '" aria-pressed="' + (k === fondActif) + '">' + f.nom + (k === fondActif ? ic('coche') : '') + '</button>').join('');
+  majInfo();
 }
-function cadrerVue() {
-  if (!etat.pos || !carte) return;
-  if (etat.onglet === 'favoris') {
-    const l = liste();
-    if (!l.length) { carte.setView(etat.pos.coords, 14); return; }
-    const b = L.latLngBounds([etat.pos.coords]);
-    l.forEach(c => b.extend(c.coords[0]));
-    carte.fitBounds(b, Object.assign({maxZoom: 16}, marges()));
-    return;
-  }
-  carte.fitBounds(L.latLng(etat.pos.coords[0], etat.pos.coords[1]).toBounds(etat.rayon * 2000), marges());
+/* ---------- sources de la carte : bulle « i », ouverte à l'arrivée, repliée dès que je touche la carte */
+const lienSource = (url, txt) => '<a href="' + url + '" target="_blank" rel="noopener">' + txt + '</a>';
+function majInfo() {
+  const osm = lienSource('https://www.openstreetmap.org/copyright', '© contributeurs OpenStreetMap'), ign = lienSource('https://www.ign.fr', '© IGN');
+  $('#info-texte').innerHTML = FONDS[fondActif] && FONDS[fondActif].nom === 'Épuré'
+    ? lienSource('https://openfreemap.org', 'OpenFreeMap') + ' · ' + lienSource('https://www.openmaptiles.org/', '© OpenMapTiles') + ' · ' + osm + ' · altitudes ' + ign
+    : 'Fond ' + ign + ' · côtes ' + osm;
+}
+function ouvrirInfo(ouverte) {
+  $('#info-carte').classList.toggle('ouverte', ouverte);
+  $('#btn-info').setAttribute('aria-expanded', String(ouverte));
+}
+function replierInfo(e) {
+  if (e && e.type === 'wheel' && !(e.target.closest && e.target.closest('#carte'))) return;
+  if ($('#info-carte').classList.contains('ouverte')) ouvrirInfo(false);
+}
+function cadrerAutour(p, r, anime) {
+  carte.fitBounds(L.latLng(p[0], p[1]).toBounds(r * 2), Object.assign({animate: !!anime}, marges()));
+}
+// centre la partie visible de la carte sur un point, sans changer le zoom (sauf si je suis très loin)
+function centrerSur(p, anime) {
+  if (carte.getZoom() < 13) { cadrerAutour(p, 1000, anime); return; }
+  const t = carte.getSize(), z = carte.getZoom();
+  const x0 = largeur() ? Math.min(432, Math.max(0, t.x - 160)) : 0, y1 = largeur() ? t.y : Math.max(80, t.y - feuilleVisible());
+  carte.panTo(carte.unproject(carte.project(p, z).add([-x0 / 2, (t.y - y1) / 2]), z), {animate: !!anime});
+}
+function cadrerFavoris() {
+  const l = D.cotes.filter(c => idsFavoris.has(c.id));
+  if (!l.length) { cadrerAutour(origine(), 1500); return; }
+  const b = L.latLngBounds(l.map(c => c.coords[0]));
+  l.forEach(c => b.extend(c.coords[c.coords.length - 1]));
+  carte.fitBounds(b, Object.assign({maxZoom: 16, animate: false}, marges()));
+}
+// le point donné et les côtes de la séance les plus proches tiennent dans la vue
+function cadrerSeance(s, o, anime) {
+  const pts = D.cotes.filter(c => c.seances.includes(s)).map(c => departPour(c, s)).sort((a, b) => dist(o, a) - dist(o, b)).slice(0, 5);
+  if (!pts.length) { cadrerAutour(o, 1500, anime); return; }
+  carte.fitBounds(L.latLngBounds(pts.concat([o])), Object.assign({maxZoom: 15, animate: !!anime}, marges()));
 }
 function cadrerCote(c, fiche) {
-  carte.fitBounds(L.latLngBounds(c.coords), Object.assign({maxZoom: fiche ? 19 : 18}, marges()));
-}
-function debordement() {
-  if (!etat.pos) return false;
-  const p = etat.pos.coords, r = etat.rayon * 1000;
-  return dist(p, [ZONE.s, p[1]]) < r || dist(p, [ZONE.n, p[1]]) < r || dist(p, [p[0], ZONE.w]) < r || dist(p, [p[0], ZONE.e]) < r;
-}
-// cercle approché par 256 points (écart au vrai cercle : quelques pixels au zoom maximal)
-function cercle(c, r) {
-  const k = Math.PI / 180, dLat = r / 111320, dLon = r / (111320 * Math.cos(c[0] * k)), pts = [];
-  for (let i = 0; i < 256; i++) { const a = i / 256 * 2 * Math.PI; pts.push([c[0] + dLat * Math.cos(a), c[1] + dLon * Math.sin(a)]); }
-  return pts;
+  carte.fitBounds(L.latLngBounds(c.coords), Object.assign({maxZoom: fiche ? 19 : 18}, marges(fiche)));
 }
 function rendreCarte() {
   if (!carte) return;
   couches.zone.clearLayers(); couches.reperes.clearLayers(); couches.trace.clearLayers(); couches.pos.clearLayers();
   couches.curseur.clearLayers(); curseurCarte = null;
   K = palette();
-  $('#carte').classList.toggle('mode-choix', etat.choix);
-  $('#bandeau-choix').hidden = !etat.choix;
-  if (!etat.pos) return;
-  const p = etat.pos.coords;
-  if (surCarte()) {
-    const anneau = cercle(p, etat.rayon * 1000);
-    L.polygon(anneau, {stroke: false, fillColor: K.zone, fillOpacity: .04, interactive: false}).addTo(couches.zone);
-    L.polyline(anneau.concat([anneau[0]]), {color: K.zone, weight: 1.5, opacity: .7, dashArray: '6 6', interactive: false}).addTo(couches.zone);
-    if (debordement()) L.polyline([[ZONE.s, ZONE.w], [ZONE.n, ZONE.w], [ZONE.n, ZONE.e], [ZONE.s, ZONE.e], [ZONE.s, ZONE.w]], {color: K.cadre, weight: 1.5, dashArray: '4 6', interactive: false}).addTo(couches.zone);
+  // limite de ma zone calculée (en pointillés) : au-delà, aucune côte n'est cherchée
+  if (surCarte()) L.polyline([[ZONE.s, ZONE.w], [ZONE.n, ZONE.w], [ZONE.n, ZONE.e], [ZONE.s, ZONE.e], [ZONE.s, ZONE.w]], {color: K.cadre, weight: 1.5, dashArray: '4 6', interactive: false}).addTo(couches.zone);
+  if (etat.gps) {
+    const p = etat.gps.coords, pr = etat.gps.precision;
+    if (pr && pr > 15) L.circle(p, {radius: pr, color: K.pos, weight: 0, fillColor: K.pos, fillOpacity: .12, interactive: false}).addTo(couches.pos);
+    L.circleMarker(p, {radius: 13, stroke: false, fillColor: K.pos, fillOpacity: .18, interactive: false}).addTo(couches.pos);
+    L.circleMarker(p, {radius: 7, color: '#FFFFFF', weight: 3, fillColor: K.pos, fillOpacity: 1, interactive: false}).addTo(couches.pos);
   }
-  if (etat.pos.precision && etat.pos.precision > 15) L.circle(p, {radius: etat.pos.precision, color: K.pos, weight: 0, fillColor: K.pos, fillOpacity: .12, interactive: false}).addTo(couches.pos);
-  L.circleMarker(p, {radius: 13, stroke: false, fillColor: K.pos, fillOpacity: .18, interactive: false}).addTo(couches.pos);
-  L.circleMarker(p, {radius: 7, color: '#FFFFFF', weight: 3, fillColor: K.pos, fillOpacity: 1, interactive: false}).addTo(couches.pos);
-  const l = liste();
-  const fiche = etat.fiche !== null ? l.find(c => c.id === etat.fiche) : null;
+  const fiche = etat.fiche !== null ? coteVue(etat.fiche) : null;
   if (fiche) { dessinerTrace(fiche, true); return; }
-  const choisie = l.find(c => c.id === etat.sel);
+  const choisie = etat.sel !== null ? coteVue(etat.sel) : null;
   if (choisie) dessinerTrace(choisie, false);
-  dessinerReperes(l);
+  // toutes les côtes de la séance sont marquées, visibles ou non : c'est la liste qui suit la vue
+  dessinerReperes(D.cotes.filter(c => etat.onglet === 'favoris' ? idsFavoris.has(c.id) : c.seances.includes(etat.seance)).map(presenter));
 }
 // Toutes les côtes ont le même repère : un point au départ. La côte choisie a un repère plus gros
 // et son tracé ; survoler une ligne de la liste met son point en avant sur la carte.
@@ -938,7 +989,7 @@ let pointsParId = new Map(), pointSurvole = null;
 function dessinerReperes(l) {
   couches.reperes.clearLayers();
   pointsParId = new Map(); pointSurvole = null;
-  const clic = c => () => { if (etat.choix) return; if (etat.sel === c.id) ouvrirFiche(c.id); else selectionner(c.id, false); };
+  const clic = c => () => { if (etat.sel === c.id) ouvrirFiche(c.id); else selectionner(c.id, false); };
   let choisie = null;
   for (const c of l) {
     if (c.id === etat.sel) { choisie = c; continue; }
@@ -969,7 +1020,7 @@ document.addEventListener('pointerover', e => {
 }, {passive: true});
 function dessinerTrace(c, etiquettes) {
   const bord = L.polyline(c.coords, {color: K.traceBord, weight: 11, opacity: 1, interactive: true, bubblingMouseEvents: false, lineCap: 'round', className: etiquettes ? 'trace-inerte' : ''}).addTo(couches.trace);
-  if (!etiquettes) bord.on('click', () => { if (!etat.choix) ouvrirFiche(c.id); });
+  if (!etiquettes) bord.on('click', () => ouvrirFiche(c.id));
   L.polyline(c.coords, {color: K.trace, weight: 6, opacity: 1, interactive: false, lineCap: 'round'}).addTo(couches.trace);
   const a = c.coords[0], b = c.coords[c.coords.length - 1];
   if (etiquettes) {
@@ -983,64 +1034,102 @@ function dessinerTrace(c, etiquettes) {
   }
 }
 
-/* ---------- panneau */
-const TXT_POS = {gps: ['Autour de ma position', 'Position exacte'], centre: ['Autour du centre de ma zone', 'Point de départ du calcul'], carte: ['Autour du point choisi', 'Placé sur la carte']};
-function elementListe(c, i) {
+/* ---------- panneau (ordinateur) ou feuille du bas (téléphone) */
+const POIGNEE = '<button type="button" class="poignee" data-action="poignee" aria-label="Agrandir la liste"><i></i></button>';
+function elementListe(c) {
   const sel = c.id === etat.sel;
   return '<div class="element' + (sel ? ' sel' : '') + '" id="el-' + c.id + '">'
     + '<button type="button" class="element-clic" data-sel="' + c.id + '" aria-pressed="' + sel + '">' + vignette(c.profil, sel)
-    + '<span class="element-txt"><b>' + esc(c.nom) + (estFavori(c.id) ? ic('etoile_pleine', '', 'mini-etoile') : '') + '</b><small>À ' + distTxt(c.dist) + ' · ' + longTxt(c.longueur) + ' de long · ' + esc(c.libelle) + '</small></span>'
+    + '<span class="element-txt"><b>' + esc(c.nom) + (estFavori(c.id) ? ic('etoile_pleine', '', 'mini-etoile') : '') + '</b><small>' + (etat.gps ? 'À ' + distTxt(c.dist) + ' · ' : '') + longTxt(c.longueur) + ' de long · ' + esc(c.libelle) + '</small></span>'
     + '<span class="element-val chiffre"><b>' + Math.round(c.denivele) + ' m</b><small>' + penteTxt(c) + '</small></span></button>'
     + (sel ? '<div class="element-actions"><button type="button" class="btn-principal" data-fiche="' + c.id + '">Voir la fiche</button><a class="btn-secondaire" href="' + lienItineraire(c) + '" target="_blank" rel="noopener">Itinéraire</a></div>' : '')
     + '</div>';
 }
-function lignePosition() {
-  const tp = TXT_POS[etat.pos.source];
-  return '<div class="ligne-pos"><span class="ico-pos">' + ic(etat.pos.source === 'carte' ? 'epingle' : etat.pos.source === 'centre' ? 'maison' : 'point') + '</span>'
-    + '<span class="txt"><b>' + tp[0] + '</b>' + (etat.attente ? '<small>Localisation en cours…</small>' : '') + '</span>'
-    + '<button type="button" class="lien" data-action="menu-pos" aria-expanded="' + etat.menuPos + '">Modifier</button>'
-    + (etat.menuPos ? '<div class="menu-pos"><button type="button" data-action="gps">' + ic('cible') + 'Utiliser ma position exacte</button>' + (surCarte() ? '<button type="button" data-action="choisir">' + ic('epingle') + 'Choisir sur la carte</button>' : '') + '<button type="button" data-action="centre">' + ic('maison') + 'Centre de ma zone</button></div>' : '')
-    + '</div>';
+const nbCotes = n => n + (n > 1 ? ' côtes' : ' côte');
+function compteTxt(l) {
+  const n = l.length;
+  return n ? '<b>' + nbCotes(n) + '</b> ' + (n > 1 ? 'visibles' : 'visible') : '<b>Aucune côte</b> visible';
+}
+function corpsCarte(l) {
+  const b = boiteVisible(), n = l.length, iSel = indexEpingle(l);
+  let h = iSel >= 0 ? '<div class="selection-carte">' + elementListe(l[iSel]) + '</div>' : '';
+  if (!n) {
+    if (b && horsDeLaZone(b)) {
+      const c = centreBoite(b);
+      return h + '<div class="vide"><b>Hors de ma zone calculée</b>Senzu ne cherche les côtes que dans le cadre en pointillés.'
+        + '<button type="button" class="btn-secondaire" data-action="revenir-zone">Revenir à ma zone</button>'
+        + '<span class="vide-astuce">Pour couvrir cet endroit, relancer le script :<code>python3 cotes.py --lat ' + c[0].toFixed(4) + ' --lon ' + c[1].toFixed(4) + ' --rayon ' + D.rayon + ' --publier</code></span></div>';
+    }
+    const aucune = !D.cotes.some(c => c.seances.includes(etat.seance));
+    return h + '<div class="vide"><b>' + (aucune ? 'Aucune côte de ce type dans ma zone' : 'Aucune côte ici') + '</b>' + esc(seance().libelle) + ' : ' + esc(seance().regle) + '.'
+      + (aucune ? '' : '<button type="button" class="btn-secondaire" data-action="plus-proches">Montrer les plus proches</button>') + '</div>';
+  }
+  if (enDescente()) h += '<p class="note">Côtes à prendre dans le sens de la descente : le départ est en haut.</p>';
+  l.slice(0, etat.max).forEach((c, i) => { if (i !== iSel) h += elementListe(c); });
+  if (l.length > etat.max) h += '<button type="button" class="btn-secondaire plus" data-action="plus">Afficher ' + Math.min(40, l.length - etat.max) + ' côtes de plus</button>';
+  if (b && debordeLaZone(b)) h += '<p class="note note-zone">Le cadre en pointillés marque la limite de ma zone calculée : au-delà, aucune côte n\'est cherchée.</p>';
+  return h;
+}
+function corpsFavoris(l) {
+  if (!l.length) return '<div class="vide"><span class="rond-ic">' + ic('etoile') + '</span><b>Pas encore de favori</b>Ouvrir la fiche d\'une côte et toucher l\'étoile pour la retrouver ici.<button type="button" class="btn-secondaire" data-onglet="carte">Parcourir la carte</button></div>';
+  const iSel = indexEpingle(l);
+  let h = iSel >= 0 ? '<div class="selection-carte">' + elementListe(l[iSel]) + '</div>' : '';
+  l.forEach((c, i) => { if (i !== iSel) h += elementListe(c); });
+  return h;
+}
+// ce qui change la liste : si rien n'a changé après un déplacement de la carte, elle n'est pas redessinée
+let signatureListe = '';
+function signature(l) {
+  const b = boiteVisible();
+  const zone = !b ? '-' : horsDeLaZone(b) ? 'h' + centreBoite(b).map(x => x.toFixed(4)).join() : debordeLaZone(b) ? 'd' : 'z';
+  return [etat.onglet, etat.seance, etat.tri, etat.max, etat.sel, etat.selCarte, l.length, zone, l.slice(0, etat.max).map(c => c.id).join(',')].join('|');
 }
 function rendrePanneau() {
   const panneau = $('#panneau');
   const anciennes = panneau.querySelector('.puces'), defilPuces = anciennes ? anciennes.scrollLeft : 0;
-  const l = liste();
-  const fiche = etat.fiche !== null ? l.find(c => c.id === etat.fiche) : null;
-  if (fiche) { coteAffichee = fiche; panneau.innerHTML = '<div class="panneau-corps">' + rendreFiche(fiche, l.length) + '</div>'; return; }
-  let h;
-  if (etat.onglet === 'favoris') {
-    h = '<div class="panneau-tete">' + '<div class="titre-onglet"><b>Mes favoris</b></div>' + lignePosition() + '</div><div class="panneau-corps"><div class="liste">';
-    if (!l.length) {
-      h += '<div class="vide"><span class="rond-ic">' + ic('etoile') + '</span><b>Pas encore de favori</b>Ouvrir la fiche d\'une côte et toucher l\'étoile pour la retrouver ici.<button type="button" class="btn-secondaire" data-onglet="carte">Parcourir la carte</button></div>';
-    } else {
-      h += '<div class="liste-tete"><span><b>' + l.length + (l.length > 1 ? ' côtes' : ' côte') + '</b> en favori</span>' + (l.length > 1 ? selectTri() : '') + '</div>';
-      const iSel = indexEpingle(l);
-      if (iSel >= 0) h += '<div class="selection-carte">' + elementListe(l[iSel], iSel) + '</div>';
-      l.forEach((c, i) => { if (i !== iSel) h += elementListe(c, i); });
-    }
-    panneau.innerHTML = h + '</div></div>';
-    return;
-  }
-  h = '<div class="panneau-tete">' + lignePosition()
-    + '<div class="segment petit" role="group" aria-label="Rayon de recherche">' + RAYONS.map(r => '<button type="button" data-rayon="' + r + '" aria-pressed="' + (r === etat.rayon) + '">' + kmTxt(r) + '</button>').join('') + '</div>'
-    + '<div class="puces" role="group" aria-label="Type de séance">' + D.seances.map(s => '<button type="button" class="puce-seance" data-seance="' + s.id + '" aria-pressed="' + (s.id === etat.seance) + '">' + esc(s.libelle) + '</button>').join('') + '</div>'
-    + '</div><div class="panneau-corps"><div class="liste">';
-  if (!l.length) {
-    const plus = RAYONS.find(r => r > etat.rayon);
-    h += '<div class="vide"><b>Aucune côte à moins de ' + kmTxt(etat.rayon) + '</b>' + esc(seance().libelle) + ' : ' + esc(seance().regle) + '.'
-      + (plus ? '<button type="button" class="btn-secondaire" data-rayon="' + plus + '">Élargir à ' + kmTxt(plus) + '</button>' : '') + '</div>';
+  const ancienCorps = panneau.querySelector('.panneau-corps'), defil = ancienCorps ? ancienCorps.scrollTop : 0, vueAvant = panneau.dataset.vue;
+  const fiche = etat.fiche !== null ? coteVue(etat.fiche) : null;
+  let h, vue;
+  if (fiche) {
+    coteAffichee = fiche; vue = 'fiche-' + fiche.id;
+    h = rendreFiche(fiche);
   } else {
-    const iSel = indexEpingle(l);
-    if (iSel >= 0) h += '<div class="selection-carte">' + elementListe(l[iSel], iSel) + '</div>';
-    h += '<div class="liste-tete"><span><b>' + l.length + (l.length > 1 ? ' côtes' : ' côte') + '</b> à moins de ' + kmTxt(etat.rayon) + '</span>' + selectTri() + '</div>';
-    if (enDescente()) h += '<p class="note">Côtes à prendre dans le sens de la descente : le départ est en haut.</p>';
-    if (debordement()) h += '<p class="note">Une partie de ce rayon sort de ma zone calculée : les côtes au-delà n\'y figurent pas.</p>';
-    l.slice(0, etat.max).forEach((c, i) => { if (i !== iSel) h += elementListe(c, i); });
-    if (l.length > etat.max) h += '<button type="button" class="btn-secondaire plus" data-action="plus">Afficher ' + Math.min(40, l.length - etat.max) + ' côtes de plus</button>';
+    const l = liste();
+    signatureListe = signature(l);
+    if (etat.onglet === 'favoris') {
+      vue = 'favoris';
+      h = '<div class="panneau-tete">' + POIGNEE + '<div class="tete-ligne"><span class="titre-onglet"><b>Mes favoris</b>' + (l.length ? '<small>' + nbCotes(l.length) + '</small>' : '') + '</span>' + (l.length > 1 ? selectTri() : '') + '</div></div>'
+        + '<div class="panneau-corps"><div class="liste">' + corpsFavoris(l) + '</div></div>';
+    } else {
+      vue = 'carte';
+      h = '<div class="panneau-tete">' + POIGNEE + '<div class="tete-ligne"><span class="compte" id="compte-liste">' + compteTxt(l) + '</span>' + selectTri() + '</div>'
+        + '<div class="puces" role="group" aria-label="Type de séance">' + D.seances.map(s => '<button type="button" class="puce-seance" data-seance="' + s.id + '" aria-pressed="' + (s.id === etat.seance) + '">' + esc(s.libelle) + '</button>').join('') + '</div></div>'
+        + '<div class="panneau-corps"><div class="liste" id="liste-cotes">' + corpsCarte(l) + '</div></div>';
+    }
   }
-  panneau.innerHTML = h + '</div></div>';
+  panneau.innerHTML = h;
+  panneau.dataset.vue = vue;
+  // même vue qu'avant (une côte choisie, un favori ajouté…) : la liste reste où je l'avais laissée
+  if (vue === vueAvant && defil) panneau.querySelector('.panneau-corps').scrollTop = defil;
+  ajusterFeuille();
   montrerPuceActive(defilPuces);
+}
+// la carte a bougé : seule la liste change (les puces et le tri restent en place)
+let minuterieListe = 0;
+function listeSuitLaCarte() {
+  clearTimeout(minuterieListe);
+  minuterieListe = setTimeout(() => { if (etat.fiche === null) { etat.max = 40; rendreListe(); } }, 60);
+}
+function rendreListe(garder) {
+  if (etat.onglet !== 'carte' || etat.fiche !== null || !carte) return;
+  const l = liste(), sig = signature(l);
+  if (sig === signatureListe) return;
+  const zone = $('#liste-cotes'), compte = $('#compte-liste');
+  if (!zone || !compte) { rendrePanneau(); return; }
+  signatureListe = sig;
+  compte.innerHTML = compteTxt(l);
+  zone.innerHTML = corpsCarte(l);
+  if (!garder) zone.parentNode.scrollTop = 0;
 }
 // une côte choisie sur la carte s'affiche en tête de liste, quel que soit son rang
 function indexEpingle(l) {
@@ -1055,15 +1144,16 @@ function montrerPuceActive(defil) {
   if (!rr.width) return;
   if (ra.left < rr.left + 16 || ra.right > rr.right - 56) r.scrollLeft += (ra.left + ra.width / 2) - (rr.left + rr.width / 2);
 }
-function rendreFiche(c, nb) {
+function rendreFiche(c) {
   const total = Math.round(etat.reps * c.denivele);
-  const infos = [c.voie, c.revetement].filter(Boolean);
+  const infos = [c.voie, c.revetement].filter(Boolean).map(esc);
+  if (etat.gps) infos.unshift('À ' + distTxt(c.dist) + ' de ma position');
   const fav = estFavori(c.id);
-  return '<div class="fiche">'
-    + '<div class="fiche-haut"><button type="button" class="retour" data-action="fermer"><span class="rond">' + ic('gauche') + '</span>' + (etat.onglet === 'favoris' ? 'Retour aux favoris' : 'Retour aux ' + nb + ' côtes') + '</button>'
+  return '<div class="panneau-tete tete-fiche">' + POIGNEE
+    + '<div class="fiche-haut"><button type="button" class="retour" data-action="fermer"><span class="rond">' + ic('gauche') + '</span>' + (etat.onglet === 'favoris' ? 'Retour aux favoris' : 'Retour à la liste') + '</button>'
     + '<button type="button" class="etoile" data-favori="' + c.id + '" aria-pressed="' + fav + '" aria-label="' + (fav ? 'Retirer des favoris' : 'Ajouter aux favoris') + '">' + (fav ? ic('etoile_pleine', '', 'ic plein') : ic('etoile')) + '</button></div>'
-    + '<div style="display:flex;flex-direction:column;gap:6px"><h1 id="fiche-titre">' + esc(c.nom) + '</h1>'
-    + '<span class="sous">À ' + distTxt(c.dist) + (etat.pos.source === 'gps' ? ' de ma position' : etat.pos.source === 'carte' ? ' de mon point' : ' du centre de ma zone') + ' · ' + infos.map(esc).join(' · ') + '</span>'
+    + '<h1 id="fiche-titre">' + esc(c.nom) + '</h1></div>'
+    + '<div class="panneau-corps"><div class="fiche"><div class="fiche-infos">' + (infos.length ? '<span class="sous">' + infos.join(' · ') + '</span>' : '')
     + '<span class="niveau">' + barres(c.niveau) + esc(c.libelle) + ' · niveau ' + c.niveau + ' sur 4</span></div>'
     + (parId[c.id] && parId[c.id].seances.includes('desc')
       ? '<div class="segment sens" role="group" aria-label="Sens de la côte"><button type="button" data-sens="montee" aria-pressed="' + !enDescente() + '">' + ic('monte') + 'En montée</button>'
@@ -1077,7 +1167,7 @@ function rendreFiche(c, nb) {
     + '<div class="total"><b class="chiffre" id="total">' + total + ' m ' + (enDescente() ? 'de D−' : 'de D+') + '</b><span id="comparaison">' + comparaison(total) + '</span></div></div>'
     + '<div class="fiche-ctas"><a class="btn-principal" href="' + lienItineraire(c) + '" target="_blank" rel="noopener">' + ic('nav') + 'Itinéraire jusqu\'au départ</a>'
     + '<a class="lien" href="https://www.openstreetmap.org/?mlat=' + c.coords[0][0] + '&amp;mlon=' + c.coords[0][1] + '#map=17/' + c.coords[0][0] + '/' + c.coords[0][1] + '" target="_blank" rel="noopener">Voir sur OpenStreetMap</a></div>'
-    + '</div>';
+    + '</div></div>';
 }
 
 /* ---------- profil ↔ carte : survoler le profil fait suivre un point sur le tracé */
@@ -1160,44 +1250,196 @@ document.addEventListener('pointercancel', cacherCurseur);
 // au doigt, le point reste affiché après le toucher ; il s'efface au prochain toucher ailleurs
 document.documentElement.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse') cacherCurseur(); });
 
+/* ---------- feuille du bas (téléphone) : trois hauteurs, comme sur Strava ; la carte reste entière dessous */
+const HAUTEURS = ['reduite', 'moitie', 'grande'];
+let feuilleH = 0, glisse = null, finGlisse = 0, tire = null;
+function hauteursFeuille() {
+  const H = $('#resultats').clientHeight, tete = $('#panneau .panneau-tete');
+  const reduite = Math.min(Math.round(H * 0.45), tete ? tete.offsetHeight : 120);
+  const grande = Math.max(reduite, H - 56);
+  return {reduite: reduite, moitie: Math.min(grande, Math.max(reduite + 120, Math.round(H * 0.5))), grande: grande};
+}
+// la feuille a toujours sa hauteur maximale ; on la fait descendre (transformation : fluide au doigt)
+function placerFeuille(h, hs) {
+  const p = $('#panneau');
+  p.style.height = hs.grande + 'px';
+  p.style.transform = 'translate3d(0,' + Math.round(hs.grande - h) + 'px,0)';
+}
+function poserFeuille(nom) {
+  etat.feuille = nom;
+  const res = $('#resultats'), p = $('#panneau');
+  if (largeur()) {   // ordinateur : panneau flottant, toujours entier
+    p.style.height = ''; p.style.transform = '';
+    res.classList.remove('feuille-grande'); res.style.removeProperty('--feuille-h');
+    return;
+  }
+  const hs = hauteursFeuille();
+  feuilleH = hs[nom];
+  placerFeuille(feuilleH, hs);
+  res.style.setProperty('--feuille-h', feuilleH + 'px');
+  res.classList.toggle('feuille-grande', nom === 'grande');
+  const corps = p.querySelector('.panneau-corps');
+  if (corps && nom !== 'grande') corps.scrollTop = 0;   // à mi-hauteur, la liste ne défile pas : on tire la feuille
+  const pg = p.querySelector('.poignee');
+  if (pg) pg.setAttribute('aria-label', nom === 'grande' ? 'Réduire la liste' : 'Agrandir la liste');
+}
+function ajusterFeuille() { if (etat.onglet !== 'accueil') poserFeuille(etat.feuille); }
+// hauteur de carte cachée par la feuille (en grand, on compte la mi-hauteur : la liste ne change pas)
+function feuilleVisible() {
+  if (largeur()) return 0;
+  return etat.feuille === 'grande' ? hauteursFeuille().moitie : feuilleH;
+}
+const panneauEl = $('#panneau');
+function debutGlisse(id, x, y, t) {
+  glisse = {id: id, x0: x, y0: y, h0: feuilleH, h: feuilleH, actif: false, y: y, t: t, v: 0, hs: null, raf: 0};
+}
+function activerGlisse() {
+  glisse.actif = true;
+  panneauEl.classList.add('glisse');
+  cacherCurseur();
+}
+function suivreGlisse(y, t) {
+  const g = glisse, hs = g.hs || (g.hs = hauteursFeuille());
+  let h = Math.min(hs.grande, g.h0 - (y - g.y0));
+  if (h < hs.reduite) h = hs.reduite - Math.min(40, (hs.reduite - h) * 0.25);   // un peu d'élasticité en bas
+  const dt = t - g.t;
+  if (dt > 0) { g.v = 0.7 * (y - g.y) / dt + 0.3 * g.v; g.y = y; g.t = t; }
+  g.h = h;
+  if (!g.raf) g.raf = requestAnimationFrame(() => { g.raf = 0; if (glisse === g) placerFeuille(g.h, hs); });
+}
+// au relâcher : vers la hauteur suivante si le geste était vif, sinon vers la plus proche
+function finirGlisse() {
+  const g = glisse;
+  glisse = null;
+  if (!g || !g.actif) return;
+  if (g.raf) cancelAnimationFrame(g.raf);
+  panneauEl.classList.remove('glisse');
+  finGlisse = performance.now();
+  const hs = g.hs || hauteursFeuille(), h = g.h;
+  let nom;
+  if (Math.abs(g.v) > 0.35) nom = g.v > 0 ? HAUTEURS.slice().reverse().find(n => hs[n] < h - 4) || 'reduite' : HAUTEURS.find(n => hs[n] > h + 4) || 'grande';
+  else nom = HAUTEURS.reduce((a, n) => Math.abs(hs[n] - h) < Math.abs(hs[a] - h) ? n : a, 'reduite');
+  poserFeuille(nom);
+  rendreListe();
+}
+panneauEl.addEventListener('pointerdown', e => {
+  if (largeur() || e.button > 0 || glisse) return;
+  // en grand, la liste défile : la feuille se tire par son en-tête (ou en tirant la liste vers le bas, voir plus bas)
+  if (etat.feuille === 'grande' && !e.target.closest('.panneau-tete')) return;
+  if (e.target.closest('select')) return;
+  debutGlisse(e.pointerId, e.clientX, e.clientY, e.timeStamp);
+});
+panneauEl.addEventListener('pointermove', e => {
+  const g = glisse;
+  if (!g || g.id !== e.pointerId) return;
+  if (!g.actif) {
+    const dx = e.clientX - g.x0, dy = e.clientY - g.y0;
+    if (Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy)) { glisse = null; return; }   // geste de côté : puces, profil
+    if (Math.abs(dy) < 8) return;
+    activerGlisse();
+    try { panneauEl.setPointerCapture(e.pointerId); } catch (err) {}
+  }
+  suivreGlisse(e.clientY, e.timeStamp);
+});
+panneauEl.addEventListener('pointerup', e => { if (glisse && glisse.id === e.pointerId) finirGlisse(); });
+panneauEl.addEventListener('pointercancel', e => { if (glisse && glisse.id === e.pointerId) finirGlisse(); });
+// en grand, tirer la liste vers le bas quand elle est tout en haut fait redescendre la feuille
+panneauEl.addEventListener('touchstart', e => {
+  tire = null;
+  if (largeur() || etat.feuille !== 'grande' || e.touches.length !== 1 || glisse) return;
+  const corps = e.target.closest('.panneau-corps');
+  if (corps && corps.scrollTop <= 0) tire = {x: e.touches[0].clientX, y: e.touches[0].clientY};
+}, {passive: true});
+panneauEl.addEventListener('touchmove', e => {
+  if (!tire) return;
+  const t = e.touches[0];
+  if (!glisse) {
+    const dx = t.clientX - tire.x, dy = t.clientY - tire.y;
+    if (dy <= 0 || Math.abs(dx) > dy) { tire = null; return; }   // vers le haut ou de côté : la liste défile normalement
+    debutGlisse('doigt', tire.x, tire.y, e.timeStamp);
+    activerGlisse();
+  }
+  if (glisse.id !== 'doigt') return;
+  e.preventDefault();
+  suivreGlisse(t.clientY, e.timeStamp);
+}, {passive: false});
+const finTirer = () => { if (tire) { tire = null; if (glisse && glisse.id === 'doigt') finirGlisse(); } };
+panneauEl.addEventListener('touchend', finTirer);
+panneauEl.addEventListener('touchcancel', finTirer);
+// après un glissement, le relâcher ne compte pas comme un toucher sur la ligne de dessous
+panneauEl.addEventListener('click', e => { if (performance.now() - finGlisse < 350) { e.stopPropagation(); e.preventDefault(); } }, true);
+
 /* ---------- actions */
 function rendreTout() { rendrePanneau(); rendreCarte(); }
 function selectionner(id, depuisListe) {
   etat.sel = id; etat.selCarte = !depuisListe;
   rendreTout();
-  const c = liste().find(x => x.id === id);
-  if (c && depuisListe) cadrerCote(c);
-  if (!depuisListe) { const corps = $('#panneau .panneau-corps'); if (corps) corps.scrollTop = 0; }
-  const b = document.querySelector('[data-sel="' + id + '"]');
-  if (b && depuisListe) b.focus({preventScroll: true});
+  const c = coteVue(id), b = boiteVisible();
+  // un favori hors de la vue : la carte va le chercher (dans la liste de l'onglet Carte, la côte est déjà visible)
+  if (c && depuisListe && b && !dansBoite(b, c.coords[0])) cadrerCote(c);
+  if (!depuisListe) {
+    const corps = $('#panneau .panneau-corps');
+    if (corps) corps.scrollTop = 0;
+    if (!largeur() && etat.feuille === 'reduite') {
+      poserFeuille('moitie');
+      // la feuille remonte : si le départ de la côte passe dessous, la carte remonte d'autant (la liste suit)
+      const p = c && carte.latLngToContainerPoint(c.coords[0]), limite = carte.getSize().y - feuilleVisible() - 48;
+      if (p && p.y > limite) carte.panBy([0, p.y - limite]);
+      else rendreListe();
+    }
+  }
+  const bt = document.querySelector('[data-sel="' + id + '"]');
+  if (!bt) return;
+  if (depuisListe) bt.focus({preventScroll: true});
+  // téléphone : si les boutons de la côte choisie dépassent de la feuille, elle s'agrandit
+  if (depuisListe && !largeur() && etat.feuille !== 'grande') {
+    const el = document.getElementById('el-' + id);
+    if (el && el.getBoundingClientRect().bottom > $('#resultats').getBoundingClientRect().bottom - 4) poserFeuille('grande');
+  }
+}
+// la feuille reprend la hauteur qu'elle avait avant l'ouverture de la fiche
+function retrouverFeuille() {
+  const f = etat.feuilleAvantFiche;
+  etat.feuilleAvantFiche = null;
+  if (f && f !== etat.feuille) { poserFeuille(f); rendreListe(); }
 }
 function deselectionner() {
   if (etat.sel === null && etat.fiche === null) return;
-  etat.sel = null; etat.fiche = null; etat.selCarte = false;
+  const fiche = etat.fiche !== null;
+  etat.sel = null; etat.fiche = null; etat.selCarte = false; etat.vueAvantFiche = null;
   rendreTout();
+  if (fiche) retrouverFeuille();
 }
 function ouvrirFiche(id, n) {
   const brut = parId[id];
+  if (!brut) return;
+  if (etat.fiche === null && carte) { etat.vueAvantFiche = {c: carte.getCenter(), z: carte.getZoom()}; etat.feuilleAvantFiche = etat.feuille; }
   etat.sensFiche = null;
   etat.fiche = id; etat.sel = id;
-  etat.reps = n || (brut ? repetitions(etat.onglet === 'carte' ? etat.seance : 'toutes', brut) : 8);
+  etat.reps = n || repetitions(etat.onglet === 'carte' ? etat.seance : 'toutes', brut);
   rendreTout();
-  const c = liste().find(x => x.id === id);
-  if (c) cadrerCote(c, true);
+  if (etat.feuille !== 'moitie') poserFeuille('moitie');
+  cadrerCote(coteVue(id), true);
   const r = document.querySelector('[data-action="fermer"]');
-  if (r) r.focus();
-  if (!largeur()) window.scrollTo(0, 0);
+  if (r) r.focus({preventScroll: true});
 }
 function fermerFiche() {
   const id = etat.fiche;
   etat.fiche = null;
+  // je retrouve la carte et la liste telles que je les avais laissées
+  if (etat.vueAvantFiche && carte) carte.setView(etat.vueAvantFiche.c, etat.vueAvantFiche.z, {animate: false});
+  etat.vueAvantFiche = null;
   rendreTout();
+  retrouverFeuille();
   const b = document.querySelector('[data-sel="' + id + '"]');
-  if (b) { b.focus({preventScroll: true}); document.getElementById('el-' + id).scrollIntoView({block: 'nearest'}); }
+  if (b) {
+    b.focus({preventScroll: true});
+    if (largeur() || etat.feuille === 'grande') document.getElementById('el-' + id).scrollIntoView({block: 'nearest'});
+  }
 }
 function changerReps(sens) {
   etat.reps = Math.min(30, Math.max(1, etat.reps + sens));
-  const c = liste().find(x => x.id === etat.fiche);
+  const c = coteVue(etat.fiche);
   if (!c) return;
   const total = Math.round(etat.reps * c.denivele);
   $('#reps').textContent = etat.reps;
@@ -1206,41 +1448,35 @@ function changerReps(sens) {
 }
 document.addEventListener('click', e => {
   const b = e.target.closest('button');
-  if (!b) {
-    if (etat.menuPos && !e.target.closest('.menu-pos')) { etat.menuPos = false; rendrePanneau(); }
-    return;
-  }
+  if (!b) return;
   const a = b.dataset;
-  if (etat.menuPos && a.action !== 'menu-pos' && !b.closest('.menu-pos')) { etat.menuPos = false; rendrePanneau(); }
   if (b.id !== 'btn-fond' && a.fond === undefined && !$('#menu-fond').hidden) { $('#menu-fond').hidden = true; $('#btn-fond').setAttribute('aria-expanded', 'false'); }
   if (b.id === 'btn-theme') { basculerTheme(); return; }
   if (a.onglet) { aller(a.onglet); return; }
   if (b.id === 'btn-localiser') { localiser(); return; }
-  if (b.id === 'btn-centre') { definirPosition(D.centre.slice(), 'centre'); return; }
   if (b.id === 'btn-zoom-plus') { carte.zoomIn(); return; }
   if (b.id === 'btn-zoom-moins') { carte.zoomOut(); return; }
-  if (b.id === 'btn-recentrer') { cadrerVue(); return; }
+  // « Me localiser » : la carte va tout de suite sur ma dernière position connue, puis sur la position fraîche
+  if (b.id === 'btn-recentrer') { if (etat.gps) centrerSur(etat.gps.coords, true); localiser(true); return; }
+  if (b.id === 'btn-info') { ouvrirInfo(!$('#info-carte').classList.contains('ouverte')); return; }
   if (b.id === 'btn-fond') { const m = $('#menu-fond'); m.hidden = !m.hidden; b.setAttribute('aria-expanded', String(!m.hidden)); return; }
   if (a.fond !== undefined) { changerFond(Number(a.fond)); $('#menu-fond').hidden = true; $('#btn-fond').setAttribute('aria-expanded', 'false'); return; }
-  if (b.id === 'btn-annuler-choix') { etat.choix = false; rendreCarte(); return; }
   if (a.favori) {
-    basculerFavori(Number(a.favori));
+    const id = Number(a.favori);
+    basculerFavori(id);
     rendreOnglets();
-    if (etat.onglet === 'favoris' && !estFavori(Number(a.favori))) { etat.fiche = null; etat.sel = null; rendreTout(); }
+    // retirée de mes favoris depuis l'onglet Favoris : retour à la liste
+    if (etat.onglet === 'favoris' && !estFavori(id)) { etat.sel = null; fermerFiche(); }
     else rendrePanneau();
     return;
   }
   if (a.seance) {
     etat.seance = a.seance; etat.sel = null; etat.fiche = null; etat.max = 40;
-    if (etat.onglet === 'accueil') { etat.rayon = rayonUtile(); aller('carte'); } else rendreTout();
+    if (etat.onglet === 'accueil') aller('carte', () => cadrerSeance(a.seance, origine()));
+    else { rendreTout(); const c = $('#panneau .panneau-corps'); if (c) c.scrollTop = 0; }
     return;
   }
   if (a.ouvrir) { ouvrirDepuisAccueil(Number(a.ouvrir), a.sc, a.n ? Number(a.n) : 0); return; }
-  if (a.rayon) {
-    etat.rayon = Number(a.rayon); etat.sel = null; etat.max = 40;
-    rendreTout(); cadrerVue(); etat.cadre[etat.onglet] = etat.onglet + '|' + etat.rayon + '|' + etat.pos.coords.join(',');
-    return;
-  }
   if (a.sel) { selectionner(Number(a.sel), true); return; }
   if (a.fiche) { ouvrirFiche(Number(a.fiche)); return; }
   if (a.reps) { changerReps(Number(a.reps)); return; }
@@ -1255,51 +1491,41 @@ document.addEventListener('click', e => {
     case 'fermer': fermerFiche(); break;
     case 'autre-idee': etat.idee++; rendreAccueil(); break;
     case 'fermer-message': etat.message = null; rendreAccueil(); break;
-    case 'voir-carte': etat.seance = 'toutes'; etat.sel = null; aller('carte'); break;
-    case 'plus': etat.max += 40; rendrePanneau(); break;
-    case 'menu-pos': etat.menuPos = !etat.menuPos; rendrePanneau(); break;
-    case 'gps': localiser(); break;
-    case 'centre': definirPosition(D.centre.slice(), 'centre'); break;
-    case 'choisir': etat.menuPos = false; etat.choix = true; rendreTout(); break;
+    case 'voir-carte': etat.seance = 'toutes'; aller('carte', () => cadrerAutour(origine(), 1500)); break;
+    case 'plus': etat.max += 40; rendreListe(true); break;
+    case 'poignee': poserFeuille(etat.feuille === 'reduite' ? 'moitie' : etat.feuille === 'moitie' ? 'grande' : 'moitie'); rendreListe(); break;
+    case 'revenir-zone': cadrerAutour(origine(), 1500, true); break;
+    case 'plus-proches': { const bx = boiteVisible(); if (bx) cadrerSeance(etat.seance, centreBoite(bx), true); break; }
   }
 });
 document.addEventListener('keydown', e => {
-  if (e.key !== 'Escape') return;
-  if (etat.choix) { etat.choix = false; rendreCarte(); }
-  else if (etat.menuPos) { etat.menuPos = false; rendrePanneau(); }
-  else if (etat.fiche !== null) fermerFiche();
+  if (e.key === 'Escape' && etat.fiche !== null) fermerFiche();
 });
 document.addEventListener('change', e => {
   if (e.target.id !== 'tri') return;
   etat.tri = e.target.value; etat.max = 40;
   rendreTout();
+  const corps = $('#panneau .panneau-corps');
+  if (corps) corps.scrollTop = 0;
   const s = $('#tri');
   if (s) s.focus();
 });
-// plus petit rayon, à partir de l'actuel, qui contient au moins une côte de la séance choisie
-function rayonUtile() {
-  const o = etat.onglet, r0 = etat.rayon, p0 = etat.pos;
-  etat.onglet = 'carte';
-  if (!etat.pos) etat.pos = {coords: D.centre.slice(), source: 'centre', precision: null};
-  let r = r0;
-  if (!liste().length) r = RAYONS.find(x => x > r0 && (etat.rayon = x, liste().length > 0)) || r0;
-  etat.onglet = o; etat.rayon = r0; etat.pos = p0;
-  return r;
-}
-function ouvrirDepuisAccueil(id, s) {
+function ouvrirDepuisAccueil(id, s, n) {
   const c = parId[id];
   if (!c) return;
-  etat.selCarte = false;
   if (s === 'fav') { aller('favoris'); ouvrirFiche(id); return; }
-  const n = arguments[2];
   etat.seance = s && D.seances.some(x => x.id === s) ? s : 'toutes';
-  const d = dist(origine(), departPour(c, etat.seance)) / 1000;
-  etat.rayon = RAYONS.find(r => r >= d) || RAYONS[RAYONS.length - 1];
-  aller('carte');
+  // la carte s'ouvre autour de la côte : en refermant la fiche, je vois ses voisines
+  aller('carte', () => cadrerAutour(departPour(c, etat.seance), 700));
   ouvrirFiche(id, n);
 }
 document.querySelectorAll('[data-icone]').forEach(el => { el.innerHTML = ic(el.dataset.icone); });
-window.addEventListener('resize', () => { if (carte) carte.invalidateSize(); });
+window.addEventListener('resize', () => {
+  if (!carte || etat.onglet === 'accueil') return;
+  carte.invalidateSize({pan: false});
+  ajusterFeuille();
+  listeSuitLaCarte();
+});
 peindreBoutonTheme();
 if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
 aller('accueil');
